@@ -12,7 +12,7 @@ def getGyazoImagesData(fetch):
         page = 0
         while True:
             page += 1
-            api_path = "https://fix-api-images-no-metadata-default--g.gyazo.cool/api/images?access_token=%s&page=%s" % (os.environ.get('gyazo_access_token'), page)
+            api_path = "https://api.gyazo.com/api/images?access_token=%s&page=%s" % (os.environ.get('gyazo_access_token'), page)
             print(api_path)
             gyazo_res = requests.get(api_path)
             # 2xx以外だったら止める
@@ -33,8 +33,8 @@ def getGyazoImagesData(fetch):
     # From:
     #   {
     #     "image_id":"xxxx",
-    #     "permalink_url":"https://fix-api-images-no-metadata-default--g.gyazo.cool/xxxx",
-    #     "url":"https://i.gyazo.cool/f4f4dfad8180f955fe6e0bbfbd1ff49c.gif",
+    #     "permalink_url":"https://api.gyazo.com/xxxx",
+    #     "url":"https://i.gyazo.com/f4f4dfad8180f955fe6e0bbfbd1ff49c.gif",
     #     "metadata":
     #       {
     #         "app":"Google Chrome",
@@ -43,7 +43,7 @@ def getGyazoImagesData(fetch):
     #         "desc":""
     #       },
     #     "type":"gif",
-    #     "thumb_url":"https://thumb.gyazo.cool/thumb/200/xxxxx.xxxxx.xxxxx-gif.gif",
+    #     "thumb_url":"https://thumb.gyazo.com/thumb/200/xxxxx.xxxxx.xxxxx-gif.gif",
     #     "created_at":"2020-04-02T01:51:43+0000"
     #   }
     # To:
