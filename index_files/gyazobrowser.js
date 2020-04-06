@@ -107,6 +107,8 @@ function initPhotoData(){
 		while(index < data.length && data[index].str.slice(0,8) == daystr){
 		    entry = data[index]
 		    entry.str = ""
+		    entry.str = daystr ////////////////////
+		    entry.str = `${year}/${month}/${day}`
 		    entry.indent = 3
 		    entry.div = photoDiv
 		    entry.size = photoSize
@@ -141,6 +143,8 @@ var entries = [];     // 日付/写真など全データの配列
 var tmpentries;
 var photoZoomer;
 
+var expanded = false;
+
 var kwentries = [];
 var keywordZoomer;
 
@@ -149,7 +153,17 @@ function init(){
     // RainbowZoomerで表示するための写真データ初期化
     initPhotoData();
 
-    photoZoomer = new RainbowZoomer(document.getElementById('photos'),entries);
+    let photodiv = document.getElementById('photos')
+    let width = window.innerWidth
+    // if(width > 720) width = 720
+    photodiv.style.width = width - 10
+    let height = window.innerHeight
+    photodiv.style.height = height - 60
+    
+    let centerline = document.getElementById('centerline')
+    centerline.style.width = width - 10
+
+    photoZoomer = new RainbowZoomer(photodiv,entries);
     photoZoomer.setClickZoom(false);
     photoZoomer.setGranularity(13);
     photoZoomer.update();
@@ -172,6 +186,8 @@ function init(){
 function keywordMatch(q){
     // alert(`keywordMatch(${q})`)
     let count = 0
+    let upq = q.toUpperCase()
+    expanded = false
     for(let i=0;i<entries.length;i++){
 	let entry = entries[i]
 	entry.matched = false
@@ -186,9 +202,9 @@ function keywordMatch(q){
 	//	}
 	//    }
 	//}
-	if((entry.comment && entry.comment.indexOf(q) >= 0) ||
-	   (entry.description && entry.description.indexOf(q) >= 0) ||
-	   (entry.keywords && entry.keywords.indexOf(q) >= 0)){
+	if((entry.comment && entry.comment.toUpperCase().indexOf(upq) >= 0) ||
+	   (entry.description && entry.description.toUpperCase().indexOf(upq) >= 0) ||
+	   (entry.keywords && entry.keywords.toUpperCase().indexOf(upq) >= 0)){
 	    entry.matched = true
 	    count += 1
 	}

@@ -66,6 +66,14 @@ class RainbowZoomer {
 	//
 	document.body.addEventListener('mouseup', this.body_mouseup, true) // RainbowZoomer外でもmouseupを取る
 	document.body.addEventListener("touchend", this.body_mouseup, true)
+
+	/*
+	this.div.addEventListener('pointerdown', this.mousedown, true)
+	this.div.addEventListener('pointerup', this.mouseup, true)
+	this.div.addEventListener('pointermove', this.mousemove, true)
+	 */
+
+	this.div.addEventListener('click', this.click, true)
 	
 	this.div.addEventListener('mousedown', this.mousedown, true)
 	this.div.addEventListener('mouseup', this.mouseup, true)
@@ -73,7 +81,7 @@ class RainbowZoomer {
 	
 	this.div.addEventListener("touchstart", this.mousedown, true)
 	this.div.addEventListener("touchend", this.mouseup, true)
-	this.div.addEventListener("touchmove", this.mousemove, false)
+	this.div.addEventListener("touchmove", this.mousemove, true)
 	
 	this.div.addEventListener('scroll', this.scroll, true)
 	this.div.addEventListener('touchdown', this.scroll, true)
@@ -194,6 +202,10 @@ RainbowZoomer.prototype.fixEvent = function(e){
 
     //document.getElementById('value').innerHTML = e.type;
 
+    let ee = {}
+    ee.pageX = e.pageX
+    ee.pageY = e.pageY
+    
     let touches = false;
     // http://www.the-xavi.com/articles/trouble-with-touch-events-jquery
     if(e.touches && e.touches.length > 0) {
@@ -204,18 +216,31 @@ RainbowZoomer.prototype.fixEvent = function(e){
     }
 
     if(touches){ // マルチタッチ機器
-	e.pageX = touches[0].pageX;
-	e.pageY = touches[0].pageY;
+	//e.pageX = touches[0].pageX;
+	//e.pageY = touches[0].pageY;
+	ee.pageX = touches[0].pageX;
+	ee.pageY = touches[0].pageY;
     }
-    //if(e.touches){ // iPhoneなど
-    //	e.pageX = e.touches[0].pageX
-    //	e.pageY = e.touches[0].pageY
-    //}
-    //else { // 普通のブラウザ
-    //}
+
+    return ee
 }
 
+/*
+RainbowZoomer.prototype.donothing = function(e){
+    if(e.type == 'mousedown'){
+	e.target.rainbowzoomer.down = true
+    }
+    if(e.type == 'mouseup'){
+	e.target.rainbowzoomer.down = false
+    }
+    e.preventDefault();
+    return true;
+}
+*/
+    
 RainbowZoomer.prototype.mousedown = function(e){
+    console.log(`mousedown - type=${e.type}`)
+    
     e.preventDefault()
     let rainbowzoomer = e.target.rainbowzoomer
 
@@ -235,29 +260,30 @@ RainbowZoomer.prototype.mousedown = function(e){
     let offsetTop = rainbowzoomer.div.offsetTop
     let offsetLeft = rainbowzoomer.div.offsetLeft
 
-    rainbowzoomer.fixEvent(e)
-    rainbowzoomer.mousedownx = e.pageX
-    rainbowzoomer.mousedowny = e.pageY
+    let ee = rainbowzoomer.fixEvent(e)
+    rainbowzoomer.mousedownx = ee.pageX
+    rainbowzoomer.mousedowny = ee.pageY
 
     rainbowzoomer.clickedentry = null
     for(let i=0;i<rainbowzoomer.entries.length;i++){
 	let entry = rainbowzoomer.entries[i]
 	if(entry.displayed[0] &&
-	   e.pageY-offsetTop >= entry.top + rainbowzoomer.offset &&
-	   e.pageX-offsetLeft >= entry.left &&
-	   (entry.width == 0 || e.pageX-offsetLeft < entry.left+entry.width)){
+	   ee.pageY-offsetTop >= entry.top + rainbowzoomer.offset &&
+	   ee.pageX-offsetLeft >= entry.left &&
+	   (entry.width == 0 || ee.pageX-offsetLeft < entry.left+entry.width)){
 	    rainbowzoomer.clickedentry = entry
     	    rainbowzoomer.origclickedtop = rainbowzoomer.clickedentry.top
 	}
     }
     if(rainbowzoomer.clickedentry){
+	/*
 	rainbowzoomer.clickedentry.div(this).style.background = "#ff0"
-	if(rainbowzoomer.clickedentry.lat){ // 地図アプリに依存してる。マズい
-	    let latlng = new google.maps.LatLng(rainbowzoomer.clickedentry.lat,rainbowzoomer.clickedentry.long)
-	    map.setCenter(latlng)
-	    ignoreNextZoom = true
-	    map.setZoom(12)
-	}
+
+	let centery = rainbowzoomer.clickedentry.div(this).style.top
+	centery = Number(centery.replace(/px/,''))
+	centery += 50
+	document.getElementById('centerline').style.top = centery
+	 */
 
 	rainbowzoomer.calcdoi()
 	rainbowzoomer.clickedentry.doi = -1000 // クリックしたエントリは消えないようにする
@@ -282,8 +308,8 @@ RainbowZoomer.prototype.mousedown = function(e){
     rainbowzoomer.down = true
     rainbowzoomer.origzoom = rainbowzoomer.zoom
     rainbowzoomer.origoffset = rainbowzoomer.offset
-    rainbowzoomer.origx = e.pageX-offsetLeft
-    rainbowzoomer.origy = e.pageY-offsetTop
+    rainbowzoomer.origx = ee.pageX-offsetLeft
+    rainbowzoomer.origy = ee.pageY-offsetTop
 }
 
 RainbowZoomer.prototype.mouseup = function(e){
@@ -295,34 +321,58 @@ RainbowZoomer.prototype.mouseup = function(e){
     let offsetTop = rainbowzoomer.div.offsetTop
     let offsetLeft = rainbowzoomer.div.offsetLeft
 
-    rainbowzoomer.fixEvent(e)
+    let ee = rainbowzoomer.fixEvent(e)
     e.preventDefault()
     rainbowzoomer.down = false
 
     if(rainbowzoomer.clickedentry){
 	if(rainbowzoomer.clickedentry.id){
-	    if(Math.abs(e.pageX - rainbowzoomer.mousedownx) < 10 &&
-	       Math.abs(e.pageY - rainbowzoomer.mousedowny) < 10){
-		window.open("https://Gyazo.com/" + rainbowzoomer.clickedentry.id)
-		// location.href= "http://Gyazz.com/Gyazo/" + rainbowzoomer.clickedentry.id
+	    if(Math.abs(ee.pageX - rainbowzoomer.mousedownx) < 10 &&
+	       Math.abs(ee.pageY - rainbowzoomer.mousedowny) < 10){
+		if(expanded){
+		    window.open("https://Gyazo.com/" + rainbowzoomer.clickedentry.id)
+		}
+		else {
+		    let s = rainbowzoomer.clickedentry.str
+		    for(let i=0;i<entries.length;i++){
+			if(entries[i].str.indexOf(s) == 0){
+			    entries[i].matched = true
+			}
+		    }
+		    expanded = true
+		    rainbowzoomer.update()
+		}
 	    }
 	}
-	//mouseuptime = new Date()
-	//if(mouseuptime - rainbowzoomer.mousedowntime < 800){
-	//    if(rainbowzoomer.clickedentry.lat){ // 地図アプリに依存してる。マズい
-	//	let latlng = new google.maps.LatLng(rainbowzoomer.clickedentry.lat,rainbowzoomer.clickedentry.long);
-	//	map.setCenter(latlng)
-	//	ignoreNextZoom = true
-	//	map.setZoom(12)
-	//    }
-	//}
-	//else if(rainbowzoomer.clickedentry.id){
-	//    if(Math.abs(e.pageX - rainbowzoomer.mousedownx) < 10 &&
-	//       Math.abs(e.pageY - rainbowzoomer.mousedowny) < 10){
-	//	window.open("http://Gyazz.com/GZ/" + rainbowzoomer.clickedentry.id)
-	//	// location.href= "http://Gyazz.com/Gyazo/" + rainbowzoomer.clickedentry.id
-	//    }
-	//}
+	else {
+	    if(Math.abs(ee.pageX - rainbowzoomer.mousedownx) < 10 &&
+	       Math.abs(ee.pageY - rainbowzoomer.mousedowny) < 10){
+		let innerhtml = rainbowzoomer.clickedentry.div(this).innerHTML
+		let s = innerhtml.match(/^(.*)\s/)[1]
+		let level1 = innerhtml.match(/^(\d+) /)
+		let level2 = innerhtml.match(/^(\d+\/\d+) /)
+		let level3 = innerhtml.match(/^(\d+\/\d+\/\d+) /)
+		for(let i=0;i<entries.length;i++){
+		    if(entries[i].str.indexOf(s) == 0){
+			if(level1){
+			    if(entries[i].str.match(/^(\d+\/\d+) /)){
+				entries[i].matched = true
+			    }
+			}
+			else if(level2){
+			    if(entries[i].str.match(/^(\d+\/\d+\/\d+) /)){
+				entries[i].matched = true
+			    }
+			}
+			else if(level3){
+			    expanded = true
+			    entries[i].matched = true
+			}
+		    }
+		}
+		rainbowzoomer.update()
+	    }
+	}
     }
 
     if(rainbowzoomer.fzoom > 0.5){
@@ -332,20 +382,24 @@ RainbowZoomer.prototype.mouseup = function(e){
 	rainbowzoomer.zoom = Math.floor(rainbowzoomer.zoom)
     }
     rainbowzoomer.calcpos()
-    rainbowzoomer.offset = rainbowzoomer.origoffset + (e.pageY-offsetTop - rainbowzoomer.origy) - (rainbowzoomer.clickedentry.top - rainbowzoomer.origclickedtop)
+    rainbowzoomer.offset = rainbowzoomer.origoffset + (ee.pageY-offsetTop - rainbowzoomer.origy) - (rainbowzoomer.clickedentry.top - rainbowzoomer.origclickedtop)
     rainbowzoomer.display()
 }
 
 RainbowZoomer.prototype.body_mouseup = function(e){
     let rainbowzoomer = e.target.rainbowzoomer
 
+    if(rainbowzoomer == undefined){
+	return
+    }
+
     //document.exitPointerLock();
-    rainbowzoomer.clickedentry.div(this).style.background = ""
+    //rainbowzoomer.clickedentry.div(this).style.background = ""
     
     let offsetTop = rainbowzoomer.div.offsetTop
     let offsetLeft = rainbowzoomer.div.offsetLeft
 
-    rainbowzoomer.fixEvent(e)
+    let ee = rainbowzoomer.fixEvent(e)
     e.preventDefault()
     rainbowzoomer.down = false
 
@@ -356,38 +410,35 @@ RainbowZoomer.prototype.body_mouseup = function(e){
 	rainbowzoomer.zoom = Math.floor(rainbowzoomer.zoom)
     }
     rainbowzoomer.calcpos()
-    rainbowzoomer.offset = rainbowzoomer.origoffset + (e.pageY-offsetTop - rainbowzoomer.origy) - (rainbowzoomer.clickedentry.top - rainbowzoomer.origclickedtop)
+    rainbowzoomer.offset = rainbowzoomer.origoffset + (ee.pageY-offsetTop - rainbowzoomer.origy) - (rainbowzoomer.clickedentry.top - rainbowzoomer.origclickedtop)
     rainbowzoomer.display()
 }
 
 RainbowZoomer.prototype.mousemove = function(e){
-    console.log("mousemove")
+    //console.log("mousemove")
+    console.log(`mousemove... type = ${e.type}`)
     
     let rainbowzoomer = e.target.rainbowzoomer
 
     //rainbowzoomer.canvas.requestPointerLock();
+    
+    let ee = rainbowzoomer.fixEvent(e);
     
     e.preventDefault()
     if(rainbowzoomer.down){
 	let offsetTop = rainbowzoomer.div.offsetTop
 	let offsetLeft = rainbowzoomer.div.offsetLeft
 
-	//if(e.changedTouches){ // iPhoneなど
-	//    e.pageX = e.changedTouches[0].pageX
-	//    e.pageY = e.changedTtouches[0].pageY
-	//}
-	//else { // 普通のブラウザ
-	//}
-	rainbowzoomer.fixEvent(e);
+	// rainbowzoomer.fixEvent(e);
 
 	// この計算にちょっと余裕(遊び)をもたせたい
-	//rainbowzoomer.zoom = rainbowzoomer.origzoom + (e.pageX-offsetLeft - rainbowzoomer.origx) / rainbowzoomer.granularity
-	let delta = ((e.pageX-offsetLeft) - rainbowzoomer.origx - 50) / rainbowzoomer.granularity
-	if(e.pageX-offsetLeft > rainbowzoomer.origx){
+	//rainbowzoomer.zoom = rainbowzoomer.origzoom + (ee.pageX-offsetLeft - rainbowzoomer.origx) / rainbowzoomer.granularity
+	let delta = ((ee.pageX-offsetLeft) - rainbowzoomer.origx - 50) / rainbowzoomer.granularity
+	if(ee.pageX-offsetLeft > rainbowzoomer.origx){
 	    if(delta < 0) delta = 0
 	}
 	else {
-	    delta = -((rainbowzoomer.origx - (e.pageX-offsetLeft) - 50) / rainbowzoomer.granularity)
+	    delta = -((rainbowzoomer.origx - (ee.pageX-offsetLeft) - 50) / rainbowzoomer.granularity)
 	    if(delta > 0) delta = 0
 	}
 	rainbowzoomer.zoom = rainbowzoomer.origzoom + delta
@@ -396,11 +447,23 @@ RainbowZoomer.prototype.mousemove = function(e){
 	if(rainbowzoomer.zoom < 3.0) rainbowzoomer.zoom = 3.0
 	if(rainbowzoomer.zoom > this.maxDOI) rainbowzoomer.zoom = this.maxDOI
 	rainbowzoomer.calcpos()
-	rainbowzoomer.offset = rainbowzoomer.origoffset + (e.pageY-offsetTop - rainbowzoomer.origy) - (rainbowzoomer.clickedentry.top - rainbowzoomer.origclickedtop)
+	rainbowzoomer.offset = rainbowzoomer.origoffset + (ee.pageY-offsetTop - rainbowzoomer.origy) - (rainbowzoomer.clickedentry.top - rainbowzoomer.origclickedtop)
 	rainbowzoomer.display()
     }
 }
 
+RainbowZoomer.prototype.click = function(e){
+    let rainbowzoomer = e.target.rainbowzoomer
+
+    rainbowzoomer.down = false
+
+    if(rainbowzoomer.clickedentry){
+	if(rainbowzoomer.clickedentry.id){
+	    window.open("https://Gyazo.com/" + rainbowzoomer.clickedentry.id)
+	}
+    }
+}
+	
 // http://www.adomas.org/javascript-mouse-wheel/
 RainbowZoomer.prototype.wheel = function(e){
     let rainbowzoomer = e.target.rainbowzoomer;
@@ -574,6 +637,19 @@ RainbowZoomer.prototype.display = function(){
 
     this.div.appendChild(this.canvas);
 
+    if(this.down){
+	if(this.clickedentry){
+	    let centery = this.clickedentry.div(this).style.top
+	    centery = Number(centery.replace(/px/,''))
+	    centery += 60
+	    document.getElementById('centerline').style.display = 'block'
+	    document.getElementById('centerline').style.top = centery
+	}
+    }
+    else {
+	document.getElementById('centerline').style.display = 'none'
+    }
+
     let ctx = this.canvas.getContext('2d');
     ctx.setTransform(1.0,0.0,0.0,1.0,0.0,0.0);
 
@@ -692,3 +768,4 @@ RainbowZoomer.prototype.setGranularity = function(val){
 RainbowZoomer.prototype.setClickZoom = function(val){
     this.clickZoom = val
 }
+
