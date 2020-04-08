@@ -352,6 +352,7 @@ RainbowZoomer.prototype.mouseup = function(e){
 		let level1 = innerhtml.match(/^(\d+) /)
 		let level2 = innerhtml.match(/^(\d+\/\d+) /)
 		let level3 = innerhtml.match(/^(\d+\/\d+\/\d+) /)
+		/*
 		for(let i=0;i<entries.length;i++){
 		    if(entries[i].str.indexOf(s) == 0){
 			if(level1){
@@ -371,10 +372,40 @@ RainbowZoomer.prototype.mouseup = function(e){
 		    }
 		}
 		rainbowzoomer.update()
+		 */
+
+		expanded = false
+		if(level1){
+		    if(rainbowzoomer.zoom == rainbowzoomer.indentLevel[2] + 1.0){
+			rainbowzoomer.zoom = rainbowzoomer.indentLevel[1] + 1.0
+		    }
+		    else {
+			rainbowzoomer.zoom = rainbowzoomer.indentLevel[2] + 1.0
+		    }
+		}
+		else if(level2){
+		    if(rainbowzoomer.zoom == rainbowzoomer.indentLevel[3] + 1.0){
+			rainbowzoomer.zoom = rainbowzoomer.indentLevel[2] + 1.0
+		    }
+		    else {
+			rainbowzoomer.zoom = rainbowzoomer.indentLevel[3] + 1.0
+		    }
+		}
+		else if(level3){
+		    if(rainbowzoomer.zoom == rainbowzoomer.maxDOI + 1.0){
+			rainbowzoomer.zoom = rainbowzoomer.indentLevel[3] + 1.0
+		    }
+		    else {
+			expanded = true
+			rainbowzoomer.zoom = rainbowzoomer.maxDOI + 1.0
+		    }
+		}
+		rainbowzoomer.fzoom = 0.0
+		
 	    }
 	}
     }
-
+    
     if(rainbowzoomer.fzoom > 0.5){
 	rainbowzoomer.zoom = Math.floor(rainbowzoomer.zoom)+1
     }
@@ -715,7 +746,7 @@ RainbowZoomer.prototype.display = function(){
 		//var col = this.rainbowColor(entry.str); // !!!
 		var col = this.rainbowColor(entry); // !!!
 		ctx.fillStyle = col;
-		ctx.fillRect(entry.left-5,entry.top+this.offset,800,300);
+		ctx.fillRect(entry.left-5,entry.top+this.offset,1500,300);
 		
 		ctx.strokeStyle = 'rgb(255,255,255)';
 		if(entry.index != oldindex+1){
