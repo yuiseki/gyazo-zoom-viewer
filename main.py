@@ -99,7 +99,7 @@ def getGyazoImagesData(fetch):
             break
     file_path = "index_files/gyazodata.js"
     with open(file_path, mode='w', encoding='utf-8') as f:
-        f.write("var data = "+json.dumps(gyazo_viewer_data_all)+";")
+        f.write("var data = "+json.dumps(gyazo_viewer_data_all, ensure_ascii=False)+";")
 
 import sys
 targetMethod = None
