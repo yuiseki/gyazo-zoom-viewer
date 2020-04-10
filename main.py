@@ -81,10 +81,10 @@ def getGyazoImagesData(fetch):
                         description += " "
                         description += image["metadata"]["desc"]
                     comment = ""
-                    if "metadata" in image and "ocr" in image["metadata"] and image["metadata"]["ocr"] is not None:
+                    if "ocr" in image and image["ocr"] is not None:
                         description += " "
-                        description += image["metadata"]["ocr"]["description"]
-                        comment = image["metadata"]["ocr"]["description"]
+                        description += image["ocr"]["description"]
+                        comment = image["ocr"]["description"]
                     data = {
                         "id": id_str,
                         "str": created_at.strftime("%Y%m%d%H%M%S"),
