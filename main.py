@@ -68,10 +68,22 @@ def getGyazoImagesData(fetch):
                     id_str = image["image_id"]
                     created_at = datetime.datetime.strptime(image["created_at"], "%Y-%m-%dT%H:%M:%S%z")
                     description = ""
-                    if "metadata" in image and "desc" in image["metadata"]:
-                        description = image["metadata"]["desc"]
+                    if "metadata" in image and "app" in image["metadata"] and image["metadata"]["app"] is not None:
+                        description += " "
+                        description += image["metadata"]["app"]
+                    if "metadata" in image and "title" in image["metadata"] and image["metadata"]["title"] is not None:
+                        description += " "
+                        description += image["metadata"]["title"]
+                    if "metadata" in image and "url" in image["metadata"] and image["metadata"]["url"] is not None:
+                        description += " "
+                        description += image["metadata"]["url"]
+                    if "metadata" in image and "desc" in image["metadata"] and image["metadata"]["desc"] is not None:
+                        description += " "
+                        description += image["metadata"]["desc"]
                     comment = ""
-                    if "metadata" in image and "ocr" in image["metadata"]:
+                    if "metadata" in image and "ocr" in image["metadata"] and image["metadata"]["ocr"] is not None:
+                        description += " "
+                        description += image["metadata"]["ocr"]["description"]
                         comment = image["metadata"]["ocr"]["description"]
                     data = {
                         "id": id_str,
