@@ -166,10 +166,12 @@ function init(){
     photoZoomer = new RainbowZoomer(photodiv,entries);
     photoZoomer.setClickZoom(false);
     photoZoomer.setGranularity(13);
-    photoZoomer.update();
+    photoZoomer.update(photoZoomer.maxDOI + 1.0); /////
 
     // 検索語からマッチ計算
-    q = (query ? query : 'asdfasdfasdf');
+    q = (query ? query : 'verystrangesearchstring');
+    // q = (query ? query : '');
+
     keywordSearchAndDisplay(q);
 
     // 「戻る」ボタンで前の状態に戻す!
@@ -204,6 +206,7 @@ function keywordMatch(q){
 	//}
 	if((entry.comment && entry.comment.toUpperCase().indexOf(upq) >= 0) ||
 	   (entry.description && entry.description.toUpperCase().indexOf(upq) >= 0) ||
+	   (entry.title && entry.title.toUpperCase().indexOf(upq) >= 0) ||
 	   (entry.keywords && entry.keywords.toUpperCase().indexOf(upq) >= 0)){
 	    entry.matched = true
 	    count += 1
@@ -215,7 +218,7 @@ function keywordSearchAndDisplay(q){
     keywordMatch(q);
 
     // RainbowZoomer表示
-    photoZoomer.update();
+    photoZoomer.update(q == "verystrangesearchstring" ? photoZoomer.maxDOI + 1.0 : 6.0);
 
     for(var i=0;i<entries.length;i++){
 	var entry = entries[i];
@@ -233,6 +236,8 @@ function keywordSearchAndDisplay(q){
 
 function dynamicquery(){
     let query = document.getElementById("query").value
-    if(query == "") query = "asdfasdfasdf"
+    if(query == ""){
+	query = "verystrangesearchstring"
+    }
     keywordSearchAndDisplay(query)
 }
