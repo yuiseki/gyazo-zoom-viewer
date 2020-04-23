@@ -12,7 +12,7 @@ def getGyazoImagesData(fetch):
         page = 0
         while True:
             page += 1
-            api_path = "https://api.gyazo.com/api/images?access_token=%s&page=%s" % (os.environ.get('gyazo_access_token'), page)
+            api_path = "https://api.gyazo.com/api/images?access_token=%s&per_page=100&page=%s" % (os.environ.get('gyazo_access_token'), page)
             print(api_path)
             gyazo_res = requests.get(api_path)
             # 2xx以外だったら止める
